@@ -19,8 +19,12 @@ void try2() {
     std::cout << m << std::endl;
 
 }
+void try3() {
+    NeuralNetwork nn({16, 12, 10}, 0.005);
+    std::cout << nn.neuronLayers << std::endl;
+}
 
 int main() {
-    try2();
+    try3();
     return 0;
 }

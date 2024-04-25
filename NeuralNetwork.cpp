@@ -1,4 +1,20 @@
 #include "NeuralNetwork.hpp"
+#define PRINT_NEURON_INDEX 1
+
+std::ostream& operator<<(std::ostream& os, const NeuralNetworkData& nn) {
+    for (uint i = 0; i < nn.size(); i++) {
+        os << "Layer " << i << ": " << std::endl;
+		if (PRINT_NEURON_INDEX == 1) {
+			for (uint j = 0; j < nn[i]->size(); j++) {
+				os << "[" << j << ": " << nn[i]->coeff(j) << "] ";
+			}
+			os << std::endl;
+		} else {
+			os << *nn[i] << std::endl;
+		}
+    }
+    return os;
+}
 
 // constructor of neural network class
 NeuralNetwork::NeuralNetwork(std::vector<uint> topology, Scalar learningRate)

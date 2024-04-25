@@ -9,6 +9,7 @@ typedef float Scalar;
 typedef Eigen::MatrixXf Matrix;
 typedef Eigen::RowVectorXf RowVector;
 typedef Eigen::VectorXf ColVector;
+typedef std::vector<RowVector*> NeuralNetworkData;
 
 class NeuralNetwork {
 public:
@@ -55,5 +56,7 @@ public:
     */
     std::vector<uint> topology;
 };
+
+std::ostream& operator<<(std::ostream& os, const NeuralNetworkData& nn);
 
 #endif
