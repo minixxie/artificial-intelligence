@@ -1,0 +1,17 @@
+FROM ubuntu:22.04 as builder
+
+RUN apt update \
+    && apt install -y ca-certificates make g++ libeigen3-dev \
+    && apt clean
+
+WORKDIR /usr/src/app
+ADD . /usr/src/app
+
+RUN make compile link
+
+FROM busybox:1.36.1-glibc
+
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /usr/src/app/main /main
+
+ENTRYPOINT ["/main"]
