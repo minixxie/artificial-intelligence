@@ -31,6 +31,8 @@ public:
     // function to train the neural network give an array of data points
     void train(std::vector<RowVector*> data);
 
+    void printWeightsMatrix(std::ostream& os);
+
     // storage objects for working of neural network
     /*
         use pointers when using std::vector<Class> as std::vector<Class> calls destructor of 

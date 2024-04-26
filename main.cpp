@@ -20,9 +20,15 @@ void try2() {
 
 }
 void try3() {
-    NeuralNetwork nn({12, 16, 10}, 0.005);
+    // NeuralNetwork nn({12, 16, 10}, 0.005);
+    NeuralNetwork nn({2, 3, 1}, 0.005);
+
+	std::cout << "[Neural Network]" << std::endl;
     // std::cout << nn.neuronLayers << std::endl;
     std::cout << nn << std::endl;
+
+	std::cout << "[Weights Matrices for each layer]" << std::endl;
+    nn.printWeightsMatrix(std::cout);
 }
 
 int main() {

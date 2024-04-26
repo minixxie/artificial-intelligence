@@ -138,3 +138,11 @@ NeuralNetwork::NeuralNetwork(std::vector<uint> topology, Scalar learningRate)
 		}
 	}
 };
+
+void NeuralNetwork::printWeightsMatrix(std::ostream& os) {
+	for (uint i = 0; i < weights.size(); i++) {
+		os << "Layer " << i << ": " << std::endl;
+		os << "--------" << std::endl;
+		os << *weights[i] << std::endl;
+	}
+}
