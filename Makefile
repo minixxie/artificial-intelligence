@@ -22,6 +22,7 @@ build:
 	nerdctl build . \
 		-f Containerfile \
 		-t neural-network-cpp:dont_push
+	nerdctl images | grep neural-network-cpp
 
 .PHONY: run
 run: build
