@@ -58,5 +58,6 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& os, const NeuralNetworkData& nn);
+std::ostream& operator<<(std::ostream& os, const NeuralNetwork& nn);
 
 #endif
