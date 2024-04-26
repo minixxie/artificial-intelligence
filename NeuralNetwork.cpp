@@ -68,10 +68,12 @@ std::ostream& operator<<(std::ostream& os, const NeuralNetwork& nn) {
 
 				if (i == nn.neuronLayers[j]->size() - 1
 					&& j != nn.neuronLayers.size() - 1) {
-					os << "]bias";
+					os << "]bias ";
 				} else {
 					os << "]     ";
 				}
+			} else {
+				os << "                    ";
 			}
 		}
 		os << std::endl;
