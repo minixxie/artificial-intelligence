@@ -7,10 +7,13 @@
 
 class NeuralNetworkLayer : public std::vector<Neuron> {
 private:
-    Neuron biasNeuron;
+    bool hasBias;
 public:
-    NeuralNetworkLayer(unsigned numNeurons);
-    Neuron& getBiasNeuron() { return biasNeuron; }
+    NeuralNetworkLayer(unsigned numNeurons, bool hasBias, unsigned numWeightsPerNeuron);
+    bool getHasBias() const { return this->hasBias; }
+    Neuron& getBiasNeuron() { return (*this).back(); }
+
+    void feedForward(const NeuralNetworkLayer& prevLayer);
 };
 
 #endif

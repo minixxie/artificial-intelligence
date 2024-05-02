@@ -1,9 +1,11 @@
 #include "NeuralNetwork.hpp"
-#define PRINT_NEURON_INDEX 1
 
-#include <iomanip>
 #include "NeuralNetworkLayer.hpp"
 #include "Neuron.hpp"
+
+#include <cassert>
+#include <iomanip>
+#include <log4cpp/Category.hh>
 
 /**
  * Overloaded insertion operator for output stream.
@@ -51,10 +53,9 @@ std::ostream& operator<<(std::ostream& os, const NeuralNetwork& nn) {
 		for (uint j = 0; j < nn.neuronLayers.size(); j++) {
 			if (i < nn.neuronLayers[j].size()) {
 				os << std::right << std::setfill('0') << std::setw(2) << i
-					<< " [" << std::left << std::setfill(' ') << std::setw(10) << nn.neuronLayers[j][i].getActivationValue();
+					<< " [" << std::left << std::setfill(' ') << std::setw(10) << nn.neuronLayers[j][i].getOutput();
 
-				if (i == nn.neuronLayers[j].size() - 1
-					&& j != nn.neuronLayers.size() - 1) {
+				if (i == nn.neuronLayers[j].size() - 1 && nn.neuronLayers[j].getHasBias()) {
 					os << "]bias ";
 				} else {
 					os << "]     ";
@@ -63,8 +64,6 @@ std::ostream& operator<<(std::ostream& os, const NeuralNetwork& nn) {
 				os << "                    ";
 			}
 		}
-		os << std::right << std::setfill('0') << std::setw(2) << i
-			<< " [" << std::left << std::setfill(' ') << std::setw(10) << nn.neuronLayers[j].getBiasNeuron().getActivationValue();
 		os << std::endl;
 	}
 
@@ -88,15 +87,18 @@ std::ostream& operator<<(std::ostream& os, const NeuralNetwork& nn) {
 // constructor of neural network class
 NeuralNetwork::NeuralNetwork(const std::vector<uint>& topology)
 {
+	log4cpp::Category& root = log4cpp::Category::getRoot();
+	root.debug("NeuralNetwork::NeuralNetwork()");
+
 	this->topology = topology;
 	for (uint i = 0; i < topology.size(); i++) {
 		// initialize neuron layers
 		if (i == topology.size() - 1) {
 			// output layer doesn't have bias neuron
-			neuronLayers.push_back(NeuralNetworkLayer(topology[i]));
+			neuronLayers.push_back(NeuralNetworkLayer(topology[i], false, 0));
 		} else {
 			// for +1: add an extra neuron for bias
-			neuronLayers.push_back(NeuralNetworkLayer(topology[i]));
+			neuronLayers.push_back(NeuralNetworkLayer(topology[i], true, topology[i + 1]));
 		}
 
 		// // initialize cache and delta vectors
@@ -134,3 +136,26 @@ NeuralNetwork::NeuralNetwork(const std::vector<uint>& topology)
 // 		os << *weights[i] << std::endl;
 // 	}
 // }
+
+
+void NeuralNetwork::feedForward(const std::vector<double>& inputVals) {
+	log4cpp::Category& root = log4cpp::Category::getRoot();
+	root.debug("NeuralNetwork::feedForward()");
+    root << log4cpp::Priority::DEBUG << "inputVals.size():" << inputVals.size();
+	root << log4cpp::Priority::DEBUG << "neuronLayers[0].size() - 1:" << (neuronLayers[0].size()-1);
+	assert(inputVals.size() == (neuronLayers[0].size() - 1));
+
+	// assign input values to input layer
+	for (unsigned i = 0; i < inputVals.size(); i++) {
+		neuronLayers[0][i].setOutput(inputVals[i]);
+	}
+	root << log4cpp::Priority::DEBUG << '\n'
+		<< (*this) << inputVals.size();
+
+	// feed forward
+	for (unsigned i = 1; i < neuronLayers.size(); i++) {
+		neuronLayers[i].feedForward(neuronLayers[i - 1]);
+		root << log4cpp::Priority::DEBUG << "NeuralNetwork::feedForward(): for loop: " << '\n'
+			<< (*this) << inputVals.size();
+	}
+}

@@ -1,7 +1,7 @@
 FROM ubuntu:22.04 as builder
 
 RUN apt update \
-    && apt install -y ca-certificates make g++ libeigen3-dev \
+    && apt install -y ca-certificates make g++ liblog4cpp5-dev \
     && apt clean
 
 WORKDIR /usr/src/app

@@ -26,6 +26,8 @@ public:
     NeuralNetwork(const std::vector<uint>& topology);
 
     friend std::ostream& operator<<(std::ostream& os, const NeuralNetwork& nn);
+
+    void feedForward(const std::vector<double>& inputVals);
 };
 
 std::ostream& operator<<(std::ostream& os, const NeuralNetwork& nn);
