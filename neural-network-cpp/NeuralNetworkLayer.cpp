@@ -16,12 +16,12 @@ NeuralNetworkLayer::NeuralNetworkLayer(unsigned numNeurons, bool hasBias, unsign
   root << log4cpp::Priority::DEBUG << "NeuralNetworkLayer::NeuralNetworkLayer(): numWeightsPerNeuron=" << numWeightsPerNeuron;
 
   for (unsigned i = 0; i < totalNumNeurons; i++) {
-    (*this).push_back(Neuron(0.0, numWeightsPerNeuron));
+    (*this).push_back(Neuron(i, 0.0, numWeightsPerNeuron));
 
   }
   if (hasBias) {
     // initialize bias neuron
-    (*this).back() = Neuron(1.0, numWeightsPerNeuron);
+    (*this).back().setOutput(1.0);
   }
 }
 
@@ -37,6 +37,6 @@ void NeuralNetworkLayer::feedForward(const NeuralNetworkLayer& prevLayer) {
     if (hasBias && i == size() - 1) {
       continue;
     }
-    (*this)[i].feedForward(prevLayer, i);
+    (*this)[i].feedForward(prevLayer);
   }
 }

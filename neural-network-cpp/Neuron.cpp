@@ -4,8 +4,8 @@
 #include <log4cpp/Category.hh>
 #include <cmath>
 
-Neuron::Neuron(double output, unsigned numWeights)
-    : output(output), weights(numWeights)
+Neuron::Neuron(unsigned neuronIndex, double output, unsigned numWeights)
+    : neuronIndex(neuronIndex), output(output), weights(numWeights)
 {
     // Initialize weights with random values
     for (unsigned i = 0; i < numWeights; i++) {
@@ -13,7 +13,7 @@ Neuron::Neuron(double output, unsigned numWeights)
     }
 }
 
-void Neuron::feedForward(const NeuralNetworkLayer& prevLayer, unsigned neuronIndex) {
+void Neuron::feedForward(const NeuralNetworkLayer& prevLayer) {
     log4cpp::Category& root = log4cpp::Category::getRoot();
     root.debug("Neuron::feedForward()");
 
