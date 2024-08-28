@@ -1,0 +1,8 @@
+FROM ubuntu:22.04
+
+RUN apt update && apt install -y make g++ libeigen3-dev \
+    && apt clean
+
+WORKDIR /usr/src/app
+ADD . /usr/src/app
+
