@@ -26,6 +26,7 @@ else:
 "
 
 export CUDA_VISIBLE_DEVICES=0
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 echo "========================="
 echo "Starting QLoRA training..."

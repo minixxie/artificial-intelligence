@@ -92,8 +92,43 @@ Domain Q&A Bot
 | LoRA rank | 8-16 |
 | LoRA target | q_proj, v_proj (or all linear) |
 | Batch size | 1 (gradient accumulation=4) |
+| Max sequence length | 1024 (limited by 8GB VRAM) |
 | Learning rate | 2e-4 |
 | Precision | bf16 |
 
 LoRA target modules:
 - q_proj, v_proj - Standard, good quality-efficiency tradeoff. ~2-4GB adapter memory during training.
+
+## Memory Optimization
+
+This project targets 8GB VRAM GPUs (e.g., RTX 4070 Laptop). Three optimizations are used without affecting training quality:
+
+| Optimization | Where | What it does |
+|---|---|---|
+| Skip `prepare_model_for_kbit_training` | `train.py` | Avoids float32 conversion of all 4-bit weights (~2GB). PEFT 0.19+ handles freezing internally. |
+| `gradient_checkpointing_kwargs={"use_reentrant": False}` | `train.py` (TrainingArguments) | More memory-efficient checkpointing backend. Identical numerical results. |
+| `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` | `02-train.sh` | Reduces GPU memory fragmentation, allowing PyTorch to reuse freed blocks. |
+
+These changes require **PEFT >= 0.19.0** and **transformers >= 4.44.0** (both pinned in `requirements.txt`).
+
+## Training Output
+
+After running `02-train.sh`, the fine-tuned LoRA adapter is saved to `./output/`:
+
+```
+output/
+├── adapter_config.json    # LoRA hyperparameters (rank, target modules, etc.)
+├── adapter.safetensors    # LoRA weights (~50 MB)
+├── training_config.json   # Custom metadata (base model path, dataset, etc.)
+├── tokenizer.json         # Tokenizer files (copied from base model)
+├── tokenizer_config.json
+└── checkpoint-xxx/        # Intermediate checkpoints (saved every 100 steps)
+    └── ...
+```
+
+The 9B base model weights are **not** copied — only the small LoRA adapter is saved. To use the fine-tuned model, run `./03-inference.sh` which loads the base model + this adapter.
+
+You can change the output directory:
+```bash
+./02-train.sh --output_dir /path/to/custom/output
+```

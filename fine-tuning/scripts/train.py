@@ -9,10 +9,9 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     BitsAndBytesConfig,
-    TrainingArguments,
 )
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-from trl import SFTTrainer
+from peft import LoraConfig, get_peft_model
+from trl import SFTConfig, SFTTrainer
 
 
 def print_device_info():
@@ -94,8 +93,8 @@ def main():
         device_map="auto",
         dtype=torch.bfloat16,
     )
-    model = prepare_model_for_kbit_training(model)
-    model.gradient_checkpointing_enable()
+    model.config.use_cache = False
+    model.lm_head = model.transformer.output_layer
     print("  Model loaded in 4-bit")
 
     print("\nStep 4: Configuring LoRA...")
@@ -113,7 +112,7 @@ def main():
     print(f"  Trainable params: {trainable_params:,} ({trainable_params / all_params:.2%} of {all_params:,})")
 
     print("\nStep 5: Setting up training...")
-    training_args = TrainingArguments(
+    training_args = SFTConfig(
         output_dir=output_dir,
         per_device_train_batch_size=1,
         gradient_accumulation_steps=4,
@@ -121,6 +120,7 @@ def main():
         learning_rate=2e-4,
         bf16=torch.cuda.is_bf16_supported(),
         fp16=not torch.cuda.is_bf16_supported(),
+        gradient_checkpointing=True,
         logging_steps=10,
         save_steps=100,
         save_total_limit=2,
@@ -128,21 +128,23 @@ def main():
         report_to="none",
         dataloader_num_workers=0,
         optim="adamw_8bit",
+        gradient_checkpointing_kwargs={"use_reentrant": False},
+        loss_type="nll",
+        dataset_text_field="text",
+        max_length=512,
+        packing=True,
     )
 
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         args=training_args,
         train_dataset=dataset,
-        dataset_text_field="text",
-        max_seq_length=2048,
-        packing=True,
     )
 
     print("\nStep 6: Starting training...")
     print(f"  Batch size: 1, Gradient accumulation: 4 (effective batch: 4)")
-    print(f"  Epochs: 3, Max seq length: 2048")
+    print(f"  Epochs: 3, Max seq length: {training_args.max_length}")
     print("=" * 60)
     trainer.train()
 
